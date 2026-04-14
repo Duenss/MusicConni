@@ -13,8 +13,8 @@ module.exports = {
   customEmoji: false,  // true = use custom emoji IDs from emoji.js, false = use default unicode
   emojiTheme: "redwhite", // active custom emoji theme key in emoji.js
   helpBannerUrl: "https://i.ibb.co/GfTxbJfC/7-edited.png", // Optional: set a direct image URL to show an inline banner in /help
-  activityName: "YouTube Music", 
-  activityType: "LISTENING",  // Available activity types : LISTENING , PLAYING
+  activityName: "🗣 DiscordBot v1.0 | @JvampaRD", 
+  activityType: "Playing",  // Available activity types : LISTENING , PLAYING
   SupportServer: "https://discord.gg/xQF9f9yUEM",
   embedTimeout: 5,
   showProgressBar: false,  // Show progress bar in track embed
@@ -25,8 +25,8 @@ module.exports = {
   errorLog: "", 
   nodes: [
   {
-  name: "GlaceYT",
-  password: "glace",
+  name: "JvampaRD",
+  password: "RD",
   host: "de-01.strixnodes.com",
   port: 2010,
   secure: false

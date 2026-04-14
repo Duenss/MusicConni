@@ -38,12 +38,14 @@ class StatusManager {
         this.stopCurrentStatus();
         this.isPlaying = true;
         
-        const activity = `🎵 ${trackTitle}`;
+        const config = require('../config');
+        const activity = config.activityName || '🗣 DiscordBot v1.0 | @JvampaRD';
+        const activityType = ActivityType[config.activityType?.toUpperCase()] || ActivityType.Playing;
      
         await this.client.user.setPresence({
             activities: [{
                 name: activity,
-                type: ActivityType.Listening
+                type: activityType
             }],
             status: 'online'
         });
@@ -53,7 +55,7 @@ class StatusManager {
                 await this.client.user.setPresence({
                     activities: [{
                         name: activity,
-                        type: ActivityType.Listening
+                        type: activityType
                     }],
                     status: 'online'
                 });
