@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const config = require('../../config.js');
 const { safeDeferReply, sendSuccessResponse, sendErrorResponse } = require('../../utils/responseHandler');
+const { isMemberAllowed } = require('../../utils/accessManager');
 
 const data = new SlashCommandBuilder()
   .setName('set')
@@ -33,6 +34,18 @@ function isOwner(userId) {
   return owners.includes(String(userId));
 }
 
+function isGuildOwner(userId, interaction) {
+  return interaction.guild?.ownerId && String(interaction.guild.ownerId) === String(userId);
+}
+
+function canUseSetCommand(userId, interaction) {
+  if (isOwner(userId) || isGuildOwner(userId, interaction)) {
+    return true;
+  }
+
+  return isMemberAllowed(interaction.member, interaction.guildId);
+}
+
 function validateImageUrl(value) {
   try {
     const url = new URL(value);
@@ -58,10 +71,10 @@ module.exports = {
       const deferred = await safeDeferReply(interaction);
       if (!deferred && !interaction.deferred && !interaction.replied) return;
 
-      if (!isOwner(interaction.user.id)) {
+      if (!canUseSetCommand(interaction.user.id, interaction)) {
         return sendErrorResponse(
           interaction,
-          '## ❌ Acceso denegado\n\nSolo el dueño del bot puede usar este comando.'
+          '## ❌ Acceso denegado\n\nSolo el dueño del servidor o el dueño del bot puede usar este comando.'
         );
       }
 
