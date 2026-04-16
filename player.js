@@ -1448,41 +1448,58 @@ async function showLyrics(channel, player) {
 
 
 function createPlaybackActionRow(disabled, paused = false, loopMode = 'none') {
-    const playEmoji = getButtonEmoji('play') || '▶️';
-    const pauseEmoji = getButtonEmoji('pause') || '⏸️';
-    const skipEmoji = getButtonEmoji('next') || '⏭️';
-    const volumeEmoji = getButtonEmoji('volume') || '🔊';
-    const loopEmoji = getButtonEmoji('settings') || '🔁';
-    const stopEmoji = getButtonEmoji('stop') || '⏹️';
+    const playEmoji = getButtonEmoji('play');
+    const pauseEmoji = getButtonEmoji('pause');
+    const skipEmoji = getButtonEmoji('next');
+    const volumeEmoji = getButtonEmoji('volume');
+    const loopEmoji = getButtonEmoji('settings');
+    const stopEmoji = getButtonEmoji('stop');
     const loopEnabled = loopMode !== 'none';
     const playbackEmoji = paused ? playEmoji : pauseEmoji;
     const playbackLabel = paused ? 'Play' : 'Pause';
     const playbackStyle = paused ? ButtonStyle.Success : ButtonStyle.Secondary;
 
-    return new ActionRowBuilder()
-        .addComponents(
-            new ButtonBuilder().setCustomId("togglePlayback").setEmoji(playbackEmoji).setLabel(playbackLabel).setStyle(playbackStyle).setDisabled(disabled),
-            new ButtonBuilder().setCustomId("skipTrack").setEmoji(skipEmoji).setLabel("Skip").setStyle(ButtonStyle.Secondary).setDisabled(disabled),
-            new ButtonBuilder().setCustomId('player_volume').setEmoji(volumeEmoji).setLabel('Volume').setStyle(ButtonStyle.Secondary).setDisabled(disabled),
-            new ButtonBuilder().setCustomId("loopToggle").setEmoji(loopEmoji).setLabel("Loop").setStyle(loopEnabled ? ButtonStyle.Success : ButtonStyle.Secondary).setDisabled(disabled),
-            new ButtonBuilder().setCustomId("stopTrack").setEmoji(stopEmoji).setLabel("Stop").setStyle(ButtonStyle.Danger).setDisabled(disabled)
-        );
+    const toggleBtn = new ButtonBuilder().setCustomId("togglePlayback").setLabel(playbackLabel).setStyle(playbackStyle).setDisabled(disabled);
+    if (playbackEmoji) toggleBtn.setEmoji(playbackEmoji);
+
+    const skipBtn = new ButtonBuilder().setCustomId("skipTrack").setLabel("Skip").setStyle(ButtonStyle.Secondary).setDisabled(disabled);
+    if (skipEmoji) skipBtn.setEmoji(skipEmoji);
+
+    const volumeBtn = new ButtonBuilder().setCustomId('player_volume').setLabel('Volume').setStyle(ButtonStyle.Secondary).setDisabled(disabled);
+    if (volumeEmoji) volumeBtn.setEmoji(volumeEmoji);
+
+    const loopBtn = new ButtonBuilder().setCustomId("loopToggle").setLabel("Loop").setStyle(loopEnabled ? ButtonStyle.Success : ButtonStyle.Secondary).setDisabled(disabled);
+    if (loopEmoji) loopBtn.setEmoji(loopEmoji);
+
+    const stopBtn = new ButtonBuilder().setCustomId("stopTrack").setLabel("Stop").setStyle(ButtonStyle.Danger).setDisabled(disabled);
+    if (stopEmoji) stopBtn.setEmoji(stopEmoji);
+
+    return new ActionRowBuilder().addComponents(toggleBtn, skipBtn, volumeBtn, loopBtn, stopBtn);
 }
 
 function createManageSongActionRow(disabled) {
-    const favoriteEmoji = getButtonEmoji('welcome') || '⭐';
-    const addEmoji = getButtonEmoji('play') || '➕';
-    const queueEmoji = getButtonEmoji('queue') || '📄';
-    const saveEmoji = getButtonEmoji('folder') || '💾';
-    const shuffleEmoji = getButtonEmoji('servers') || '🌐';
+    const favoriteEmoji = getButtonEmoji('welcome');
+    const addEmoji = getButtonEmoji('play');
+    const queueEmoji = getButtonEmoji('queue');
+    const saveEmoji = getButtonEmoji('folder');
+    const shuffleEmoji = getButtonEmoji('servers');
 
-    return new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('player_favorite').setEmoji(favoriteEmoji).setLabel('Favorite').setStyle(ButtonStyle.Secondary).setDisabled(disabled),
-        new ButtonBuilder().setCustomId('player_add_song').setEmoji(addEmoji).setLabel('Add').setStyle(ButtonStyle.Secondary).setDisabled(disabled),
-        new ButtonBuilder().setCustomId('player_queue').setEmoji(queueEmoji).setLabel('Queue').setStyle(ButtonStyle.Secondary).setDisabled(disabled),
-        new ButtonBuilder().setCustomId('player_save_song').setEmoji(saveEmoji).setLabel('Save').setStyle(ButtonStyle.Secondary).setDisabled(disabled),
-        new ButtonBuilder().setCustomId('player_shuffle').setEmoji(shuffleEmoji).setLabel('Shuffle').setStyle(ButtonStyle.Secondary).setDisabled(disabled)
-    );
+    const favBtn = new ButtonBuilder().setCustomId('player_favorite').setLabel('Favorite').setStyle(ButtonStyle.Secondary).setDisabled(disabled);
+    if (favoriteEmoji) favBtn.setEmoji(favoriteEmoji);
+
+    const addBtn = new ButtonBuilder().setCustomId('player_add_song').setLabel('Add').setStyle(ButtonStyle.Secondary).setDisabled(disabled);
+    if (addEmoji) addBtn.setEmoji(addEmoji);
+
+    const queueBtn = new ButtonBuilder().setCustomId('player_queue').setLabel('Queue').setStyle(ButtonStyle.Secondary).setDisabled(disabled);
+    if (queueEmoji) queueBtn.setEmoji(queueEmoji);
+
+    const saveBtn = new ButtonBuilder().setCustomId('player_save_song').setLabel('Save').setStyle(ButtonStyle.Secondary).setDisabled(disabled);
+    if (saveEmoji) saveBtn.setEmoji(saveEmoji);
+
+    const shuffleBtn = new ButtonBuilder().setCustomId('player_shuffle').setLabel('Shuffle').setStyle(ButtonStyle.Secondary).setDisabled(disabled);
+    if (shuffleEmoji) shuffleBtn.setEmoji(shuffleEmoji);
+
+    return new ActionRowBuilder().addComponents(favBtn, addBtn, queueBtn, saveBtn, shuffleBtn);
 }
 
 function createFilterRow(disabled, activeFilter = null) {

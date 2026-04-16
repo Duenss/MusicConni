@@ -203,13 +203,13 @@ module.exports = {
 
             const buttons = [];
             for (let i = 0; i < tracks.length; i++) {
-                buttons.push(
-                    new ButtonBuilder()
-                        .setCustomId(`search_select_${i}_${interaction.id}`)
-                        .setLabel(`${i + 1}`)
-                        .setStyle(ButtonStyle.Primary)
-                        .setEmoji(getButtonEmoji('music') || undefined)
-                );
+                const btn = new ButtonBuilder()
+                    .setCustomId(`search_select_${i}_${interaction.id}`)
+                    .setLabel(`${i + 1}`)
+                    .setStyle(ButtonStyle.Primary);
+                const musicEmoji = getButtonEmoji('music');
+                if (musicEmoji) btn.setEmoji(musicEmoji);
+                buttons.push(btn);
             }
 
             const cancelButton = new ButtonBuilder()

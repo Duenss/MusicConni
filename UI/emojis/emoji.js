@@ -79,19 +79,26 @@ function getButtonEmoji(key) {
         const custom = resolveCustomEntry(entry);
         if (custom?.name && custom?.id) {
             return {
-                name: custom.name,
                 id: custom.id,
-                animated: Boolean(custom.animated)
+                name: custom.name,
+                animated: Boolean(custom.animated || false)
             };
         }
 
         if (custom?.raw) {
             const parsed = parseRawCustomEmoji(custom.raw);
-            if (parsed) return parsed;
+            if (parsed) {
+                return {
+                    id: parsed.id,
+                    name: parsed.name,
+                    animated: false
+                };
+            }
         }
     }
 
-    return entry.default || null;
+    // Return unicode emoji as-is (can't be used as button emoji)
+    return null;
 }
 
 module.exports = {

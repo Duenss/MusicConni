@@ -12,10 +12,10 @@ module.exports = {
   embedColor: "#e11d2e",
   customEmoji: true,  // true = use custom emoji IDs from emoji.js, false = use default unicode
   emojiTheme: "redwhite", // active custom emoji theme key in emoji.js
-  helpBannerUrl: "https://i.ibb.co/GfTxbJfC/7-edited.png", // Optional: set a direct image URL to show an inline banner in /help
-  activityName: "YouTube Music", 
-  activityType: "LISTENING",  // Available activity types : LISTENING , PLAYING
-  SupportServer: "https://discord.gg/xQF9f9yUEM",
+  helpBannerUrl: "https://i.ibb.co/vnN76sQ/deoo.jpg", // Optional: set a direct image URL to show an inline banner in /help
+  activityName: "🗣 DiscoBot v1|@jvampaRD",  // Bot activity status message
+  activityType: "PLAYING",  // Available activity types : LISTENING , PLAYING
+  SupportServer: "https://discord.gg/p2X33sKxjr",
   embedTimeout: 5,
   showProgressBar: false,  // Show progress bar in track embed
   showVisualizer: false,  // Show visualizer on music card (disabled for low-memory optimization)
@@ -25,11 +25,11 @@ module.exports = {
   errorLog: "", 
   nodes: [
   {
-  name: "JVAMPARD",
-  password: "youshallnotpass",
-  host: "lavalink.jirayu.net",
-  port: 443,
-  secure: true
+  name: "GlaceYT",
+  password: "glace",
+  host: "de-01.strixnodes.com",
+  port: 2010,
+  secure: false
 }
   ]
 }
