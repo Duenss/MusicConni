@@ -12,7 +12,7 @@ module.exports = {
   setupFilePath: './commands/setup.json',
   commandsDir: './commands',  
   embedColor: "#e11d2e",
-  customEmoji: true,  // true = use custom emoji IDs from emoji.js, false = use default unicode
+  customEmoji: false,  // true = use custom emoji IDs from emoji.js, false = use default unicode
   emojiTheme: "redwhite", // active custom emoji theme key in emoji.js
   helpBannerUrl: "https://i.ibb.co/vnN76sQ/deoo.jpg", // Optional: set a direct image URL to show an inline banner in /help
   activityName: "🗣 DiscoBot v1|@jvampaRD",  // Bot activity status message
