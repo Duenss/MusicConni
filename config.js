@@ -28,7 +28,7 @@ module.exports = {
   name: "JVAMPARD",
   password: "youshallnotpass",
   host: "lavalink.jirayu.net",
-  port: 11167,
+  port: 443,
   secure: true
 }
   ]
