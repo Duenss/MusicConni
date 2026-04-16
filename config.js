@@ -1,5 +1,7 @@
 
 
+
+
 module.exports = {
   TOKEN: "",
   language: "en",
@@ -25,11 +27,12 @@ module.exports = {
   errorLog: "", 
   nodes: [
   {
-  name: "JVAMPARD",
-  password: "youshallnotpass",
-  host: "lavalink.jirayu.net",
-  port: 443,
-  secure: true
+  name: "GlaceYT",
+  password: "glace",
+  host: "de-01.strixnodes.com",
+  port: 2010,
+  secure: false
 }
   ]
 }
+
