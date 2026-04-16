@@ -78,21 +78,14 @@ function getButtonEmoji(key) {
     if (useCustomEmoji()) {
         const custom = resolveCustomEntry(entry);
         if (custom?.name && custom?.id) {
-            return {
-                id: custom.id,
-                name: custom.name,
-                animated: Boolean(custom.animated || false)
-            };
+            const prefix = custom.animated ? "<a:" : "<:";
+            return `${prefix}${custom.name}:${custom.id}>`;
         }
 
         if (custom?.raw) {
             const parsed = parseRawCustomEmoji(custom.raw);
             if (parsed) {
-                return {
-                    id: parsed.id,
-                    name: parsed.name,
-                    animated: false
-                };
+                return `<:${parsed.name}:${parsed.id}>`;
             }
         }
     }
