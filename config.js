@@ -25,10 +25,10 @@ module.exports = {
   errorLog: "", 
   nodes: [
   {
-  name: "GlaceYT",
-  password: "glace",
-  host: "de-01.strixnodes.com",
-  port: 2010,
+  name: "JVAMPARD",
+  password: "jvampard",
+  host: "85.215.220.246",
+  port: 11167,
   secure: false
 }
   ]
