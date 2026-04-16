@@ -78,8 +78,8 @@ function getButtonEmoji(key) {
     if (useCustomEmoji()) {
         const custom = resolveCustomEntry(entry);
         if (custom?.name && custom?.id) {
-            const prefix = custom.animated ? "<a:" : "<:";
-            return `${prefix}${custom.name}:${custom.id}>`;
+            // Return string format for Discord.js v14
+            return `<:${custom.name}:${custom.id}>`;
         }
 
         if (custom?.raw) {
