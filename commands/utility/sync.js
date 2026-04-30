@@ -16,7 +16,7 @@ module.exports = {
 
   async execute(interaction) {
     // Verificar si es administrador
-    const isDev = interaction.user.id === "1065387598649733160";
+    const isDev = interaction.user.id === "1490564957622767676";
     const isAdmin = interaction.member.permissions.has(
       PermissionsBitField.Flags.Administrator
     );
