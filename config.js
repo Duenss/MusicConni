@@ -1,9 +1,9 @@
 
 
 module.exports = {
-  TOKEN: "",
+  TOKEN: "MTQ5OTU0MzM5MDYyMTEzOTEwNQ.GtILPA.DtznmpOdVGo3ayCJVejbYTmg9RSIq3uYI1-pTk",
   language: "en",
-  ownerID: ["1004206704994566164", ""], 
+  ownerID: ["1490564957622767676", ""], 
   mongodbUri : "mongodb+srv://shiva:shiva@musicbotyt.ouljywv.mongodb.net/?retryWrites=true&w=majority",
   spotifyClientId : "f5abd04b2ea54a3199a81dc9421d2b3b",
   spotifyClientSecret : "a67ff53f89c2489da4fb4c52c6310748",
