@@ -1,127 +1,105 @@
-const {
-  SlashCommandBuilder,
-  MessageFlags,
-  PermissionsBitField,
-  EmbedBuilder,
-} = require("discord.js");
-const fs = require("fs");
-const { execSync } = require("child_process");
+const { SlashCommandBuilder } = require('discord.js');
+const fs = require('fs');
+const { execSync } = require('child_process');
+
+const config = require('../../config.js');
+const { safeDeferReply, sendSuccessResponse, sendErrorResponse } = require('../../utils/responseHandler');
+const { isMemberAllowed } = require('../../utils/accessManager');
+
+const data = new SlashCommandBuilder()
+  .setName('sync')
+  .setDescription('Sincroniza los comandos slash del bot en este servidor.');
+
+function isOwner(userId) {
+  const owners = Array.isArray(config.ownerID) ? config.ownerID : [config.ownerID];
+  return owners.includes(String(userId));
+}
+
+function canUseSync(userId, interaction) {
+  if (isOwner(userId)) return true;
+
+  if (interaction.member.permissions.has('Administrator')) return true;
+
+  return isMemberAllowed(interaction.member, interaction.guildId);
+}
 
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName("sync")
-    .setDescription("Sincroniza los comandos slash del bot en este servidor.")
-    .setContexts(0)
-    .setIntegrationTypes(0),
+  data,
 
-  async execute(interaction) {
-    // Verificar si es administrador
-    const isDev = interaction.user.id === "1490564957622767676";
-    const isAdmin = interaction.member.permissions.has(
-      PermissionsBitField.Flags.Administrator
-    );
-
-    if (!isDev && !isAdmin) {
-      const errorEmbed = new EmbedBuilder()
-        .setColor(0xff0000)
-        .setDescription("⚠️ Solo administradores pueden usar este comando.");
-
-      return interaction.reply({
-        embeds: [errorEmbed],
-        flags: MessageFlags.Ephemeral,
-      });
-    }
-
-    // Mostrar que está procesando
-    const processingEmbed = new EmbedBuilder()
-      .setColor(0x3498db)
-      .setDescription("⏳ Sincronizando comandos en este servidor...");
-
-    await interaction.reply({
-      embeds: [processingEmbed],
-      flags: MessageFlags.Ephemeral,
-    });
-
+  run: async (client, interaction) => {
     try {
+      const deferred = await safeDeferReply(interaction);
+      if (!deferred && !interaction.deferred && !interaction.replied) return;
+
+      if (!canUseSync(interaction.user.id, interaction)) {
+        return sendErrorResponse(
+          interaction,
+          '## ❌ Acceso denegado\n\nSolo administradores o el owner del bot pueden usar este comando.'
+        );
+      }
+
       const commands = [];
 
-      // Cargar todos los comandos
-      for (const category of fs.readdirSync("./SlashCommands")) {
+      // Cargar comandos dinámicamente
+      for (const category of fs.readdirSync('./SlashCommands')) {
         const categoryPath = `./SlashCommands/${category}`;
-        
+
         if (!fs.statSync(categoryPath).isDirectory()) continue;
-        
+
         const files = fs
           .readdirSync(categoryPath)
-          .filter((file) => file.endsWith(".js"));
+          .filter((file) => file.endsWith('.js'));
 
         for (const file of files) {
           try {
-            const commandPath = `../${category}/${file}`;
-            const command = require(commandPath);
-            
-            if (command && command.data) {
+            const command = require(`../../SlashCommands/${category}/${file}`);
+
+            if (command?.data) {
               commands.push(command.data.toJSON());
             }
-          } catch (loadError) {
-            console.error(`⚠️ Error al cargar ${category}/${file}:`, loadError.message);
+          } catch (err) {
+            console.error(`Error cargando ${category}/${file}:`, err.message);
           }
         }
       }
 
-      if (commands.length === 0) {
-        throw new Error("No se pudieron cargar comandos");
+      if (!commands.length) {
+        return sendErrorResponse(
+          interaction,
+          '## ❌ No se encontraron comandos\n\nVerifica la carpeta `/SlashCommands`.'
+        );
       }
 
-      // Sincronizar en este servidor (evita duplicados con globales)
       await interaction.guild.commands.set(commands);
 
-      // Obtener última hora de actualización solo si git está disponible
-      let lastUpdate = "No disponible";
-      try {
-        execSync("git --version", { stdio: "ignore", cwd: process.cwd() });
+      // Obtener última actualización (git)
+      let lastUpdate = 'No disponible';
 
-        const commitDate = execSync("git log -1 --format=%ai", {
-          encoding: "utf-8",
-          cwd: process.cwd(),
+      try {
+        execSync('git --version', { stdio: 'ignore' });
+
+        const commitDate = execSync('git log -1 --format=%ai', {
+          encoding: 'utf-8',
         }).trim();
 
         if (commitDate) {
           const date = new Date(commitDate);
-          lastUpdate = date.toLocaleString("es-ES", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          });
+          lastUpdate = date.toLocaleString('es-ES');
         }
-      } catch (error) {
-        // Git no está instalado o no se puede obtener la fecha del último commit.
-      }
+      } catch {}
 
-      const successEmbed = new EmbedBuilder()
-        .setColor(0x2ecc71)
-        .setTitle("✅ Sincronización completada")
-        .setDescription(
-          `📊 Comandos: ${commands.length}\n📅 Última actualización: ${lastUpdate}`
-        );
+      return sendSuccessResponse(
+        interaction,
+        `## ✅ Sincronización completada\n\n📊 Comandos: **${commands.length}**\n📅 Última actualización: **${lastUpdate}**`
+      );
 
-      await interaction.editReply({
-        embeds: [successEmbed],
-      });
     } catch (error) {
-      console.error("❌ Error en sincronización:", error.message);
+      console.error('Error en sync:', error);
 
-      const errorEmbed = new EmbedBuilder()
-        .setColor(0xff0000)
-        .setTitle("❌ Error en sincronización")
-        .setDescription(error.message || "Error desconocido");
-
-      await interaction.editReply({
-        embeds: [errorEmbed],
-      });
+      return sendErrorResponse(
+        interaction,
+        `## ❌ Error en sincronización\n\n${error.message || 'Error desconocido'}`
+      );
     }
   },
 };
