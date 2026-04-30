@@ -23,6 +23,44 @@ const spotifyApi = new SpotifyWebApi({
     clientSecret: config.spotifyClientSecret,
 });
 
+// Validate Spotify credentials on startup
+if (!config.spotifyClientId || !config.spotifyClientSecret) {
+    console.warn('[SPOTIFY] ⚠️ WARNING: Spotify credentials are missing in config.js - playlist features will not work');
+}
+
+let spotifyAccessToken = null;
+let spotifyTokenExpiresAt = 0;
+
+async function getSpotifyAccessToken(forceRefresh = false) {
+    const now = Date.now();
+    
+    // Return cached token if still valid (refresh 1 min before expiry)
+    if (!forceRefresh && spotifyAccessToken && spotifyTokenExpiresAt > now + 60000) {
+        return spotifyAccessToken;
+    }
+
+    try {
+        const response = await spotifyApi.clientCredentialsGrant();
+        
+        if (!response.body || !response.body.access_token) {
+            throw new Error('No access token in response');
+        }
+
+        spotifyAccessToken = response.body.access_token;
+        spotifyTokenExpiresAt = now + (response.body.expires_in * 1000);
+        
+        console.log('[SPOTIFY] ✅ Successfully obtained access token');
+        return spotifyAccessToken;
+    } catch (error) {
+        console.error('[SPOTIFY] ❌ Failed to get access token:', {
+            status: error.statusCode || error.status,
+            message: error.message,
+            body: error.body || 'N/A'
+        });
+        throw error;
+    }
+}
+
 async function waitForPlayerConnection(player, timeoutMs = 15000) {
     const startedAt = Date.now();
     while (Date.now() - startedAt < timeoutMs) {
@@ -34,32 +72,83 @@ async function waitForPlayerConnection(player, timeoutMs = 15000) {
     return false;
 }
 
-async function getSpotifyPlaylistTracks(playlistId) {
+async function getSpotifyPlaylistTracks(playlistId, retryCount = 0) {
+    const maxRetries = 2;
+    
     try {
-        const data = await spotifyApi.clientCredentialsGrant();
-        spotifyApi.setAccessToken(data.body.access_token);
+        if (!playlistId || playlistId.trim() === '') {
+            throw new Error('Invalid playlist ID: empty or null');
+        }
+
+        // Get access token with refresh logic
+        const accessToken = await getSpotifyAccessToken();
+        spotifyApi.setAccessToken(accessToken);
+
+        console.log(`[SPOTIFY] Fetching playlist: ${playlistId}`);
 
         let tracks = [];
         let offset = 0;
         let limit = 100;
         let total = 0;
+        let attempts = 0;
+        const maxAttempts = 50; // Prevent infinite loops
 
         do {
-            const response = await spotifyApi.getPlaylistTracks(playlistId, { limit, offset });
-            total = response.body.total;
-            offset += limit;
-
-            for (const item of response.body.items) {
-                if (item.track && item.track.name && item.track.artists) {
-                    const trackName = `${item.track.name} - ${item.track.artists.map(a => a.name).join(', ')}`;
-                    tracks.push(trackName);
-                }
+            if (attempts >= maxAttempts) {
+                console.warn(`[SPOTIFY] Maximum pagination attempts (${maxAttempts}) reached. Stopping.`);
+                break;
             }
+
+            try {
+                const response = await spotifyApi.getPlaylistTracks(playlistId, { limit, offset });
+                
+                if (!response.body || !response.body.items) {
+                    throw new Error('Invalid response structure from Spotify API');
+                }
+
+                total = response.body.total;
+                offset += limit;
+
+                for (const item of response.body.items) {
+                    if (item.track && item.track.name && item.track.artists) {
+                        const trackName = `${item.track.name} - ${item.track.artists.map(a => a.name).join(', ')}`;
+                        tracks.push(trackName);
+                    }
+                }
+                
+                attempts++;
+                
+            } catch (paginationError) {
+                console.error(`[SPOTIFY] Error during pagination at offset ${offset}:`, {
+                    status: paginationError.statusCode || paginationError.status,
+                    message: paginationError.message
+                });
+                break;
+            }
+
         } while (tracks.length < total);
 
+        console.log(`[SPOTIFY] ✅ Successfully fetched ${tracks.length} tracks from playlist`);
         return tracks;
+
     } catch (error) {
-        console.error("Error fetching Spotify playlist tracks:", error);
+        console.error('[SPOTIFY] ❌ Error fetching Spotify playlist tracks:', {
+            playlistId,
+            status: error.statusCode || error.status,
+            message: error.message,
+            errorBody: error.body || 'N/A',
+            retryCount
+        });
+
+        // Retry logic for temporary failures
+        if (retryCount < maxRetries && 
+            (error.statusCode === 429 || error.statusCode === 503 || error.message.includes('timeout'))) {
+            const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+            console.log(`[SPOTIFY] Retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return getSpotifyPlaylistTracks(playlistId, retryCount + 1);
+        }
+
         return [];
     }
 }

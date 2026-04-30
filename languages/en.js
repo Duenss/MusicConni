@@ -992,6 +992,18 @@ module.exports = {
                 message: "An error occurred while retrieving history.",
                 note: "Please try again later."
             }
+        },
+        tts: {
+            command: {
+                name: "tts",
+                description: "Join voice and read a text channel in voice"
+            },
+            success: {
+                start: "✅ TTS activated. I am now reading messages from {channel}.",
+                stop: "⏹️ TTS has been stopped.",
+                alreadyActive: "⚠️ TTS is already active for {channel}.",
+                notActive: "⚠️ TTS is not currently active."
+            }
         }
     },
     events: {
